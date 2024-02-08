@@ -4,11 +4,11 @@
             Skupina {{ $group->name }}
         </h2>
     </x-slot>
-    <div class="mt-2 max-w-5xl mx-auto">
+    <div class="mt-2 max-w-5xl mx-auto w-full flex">
         <a href="javascript:history.back()"
-            class="bg-gray-800 font-semibold text-white text-xs hover:bg-gray-700 uppercase rounded-md tracking-widest p-2">
-            <i class="fa-solid fa-left-long"></i>
-            Zpět
+        class="bg-gray-800 font-semibold text-white text-md hover:bg-gray-700 uppercase rounded-md p-2 w-full text-center">
+        <i class="fa-solid fa-left-long"></i>
+        Zpět
         </a>
     </div>
     <div
@@ -21,14 +21,26 @@
                 {{ __('Uživatelé') }}
             </x-nav-link>
             @if(Auth::user()->groups->where('id', $group->id)->first() && Auth::user()->groups->where('id', $group->id)->first()->pivot->is_moderator)
-            <x-nav-link :href="route('delete-group', $group->id)" :active="request()->routeIs('delete-group')">
-                {{ __('Odstranit skupinu') }}
+            <x-nav-link :href="route('group_settings', $group->id)" :active="request()->routeIs('group_settings')">
+                {{ __('Nastavení skupiny') }}
             </x-nav-link>
             @endif
         </div>
         <span class="flex text-3xl border-b-black border-b-2 pb-2 mt-2 dark:border-b-white">
             {{ $group->name }}
         </span>
+        @if ($group->users->count() != 1)
+        <form method="POST" action="{{ route('transfer', $group->id) }}" class="my-2">
+            @csrf
+            <label for="user_id">Vyberte nového moderátora:</label>
+            <select name="new_moderator">
+                @foreach($group->users->where('name', '!=', 'admin') as $user)
+                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                @endforeach
+            </select> <br>
+            <button class="bg-blue-600 hover:bg-blue-700 font-bold p-2 text-white rounded-lg mt-4" type="submit">Převést práva</button>
+        </form>
+        @endif
         <form action="{{ route('deleteGroup', $group->id) }}" method="GET">
             <button type="submit" class="bg-red-500 hover:bg-red-600 font-bold p-2 text-white rounded-lg mt-4">Odstranit skupinu</button>
         </form>

@@ -4,11 +4,11 @@
             Skupina {{ $group->name }}
         </h2>
     </x-slot>
-    <div class="mt-2 max-w-5xl mx-auto">
+    <div class="mt-2 max-w-5xl mx-auto w-full flex">
         <a href="javascript:history.back()"
-            class="bg-gray-800 font-semibold text-white text-xs hover:bg-gray-700 uppercase rounded-md tracking-widest p-2">
-            <i class="fa-solid fa-left-long"></i>
-            Zpět
+        class="bg-gray-800 font-semibold text-white text-md hover:bg-gray-700 uppercase rounded-md p-2 w-full text-center">
+        <i class="fa-solid fa-left-long"></i>
+        Zpět
         </a>
     </div>
     <div
@@ -22,7 +22,7 @@
             </x-nav-link>
             @if (Auth::user()->groups->where('id', $group->id)->first() &&
                     Auth::user()->groups->where('id', $group->id)->first()->pivot->is_moderator)
-                <x-nav-link :href="route('delete-group', $group->id)" :active="request()->routeIs('delete-group')">
+                <x-nav-link :href="route('group_settings', $group->id)" :active="request()->routeIs('group_settings')">
                     {{ __('Odstranit skupinu') }}
                 </x-nav-link>
             @endif

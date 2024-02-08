@@ -10,11 +10,11 @@
                 resize: false,
                 branding: false,
                 statusbar: false,
-                plugins: 'emoticons image br',
-                toolbar: 'bold italic underline strikethrough | image emoticons',
+                height: 300,
+                plugins: 'emoticons autoresize',
+                toolbar: 'bold italic underline strikethrough | emoticons',
             });
         </script>
-        <script src="https://kit.fontawesome.com/0dec8d6a33.js" crossorigin="anonymous"></script>
     </x-slot>
     <div class="mt-8 max-w-7xl mx-auto bg-white px-6 py-6 dark-text dark:border-2 dark:border-white dark:bg-black">
         <form action="{{ route('create-post') }}" method="post">
@@ -40,7 +40,7 @@
             <div class="p-2">
                 <select name="group_id" id="group_id" class="form-control text-center">
                     <option value="choose">Vyberte možnost:</option>
-                    <option value="0"><i class="fa-solid fa-earth-americas"></i> Veřejný</option>
+                    <option value="0">Veřejný</option>
                     @foreach ($groups as $group)
                         <option value="{{ $group->id }}">{{ $group->name }}</option>
                     @endforeach
@@ -50,7 +50,7 @@
                 @enderror
             </div>
             <div class="flex justify-end items-end p-2 mt-2">
-                <button type="submit" class="btn-dark">Odeslat</button>
+                <button type="submit" class="text-white font-bold bg-blue-500 hover:bg-blue-600 p-2 inline rounded-lg">Odeslat</button>
             </div>
         </form>
     </div>

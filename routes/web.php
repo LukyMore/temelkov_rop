@@ -21,70 +21,90 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::get('/create', [PostController::class, 'loadGroupsDropdown'])->name('create');
-
-Route::post('/create-post', [PostController::class, 'create'])->name('create-post');
-Route::get('/posts', [PostController::class, 'loadPosts'])->name('posts');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-Route::get('/search', [PostController::class, 'searchPosts'])->name('search');
-
-Route::get('/user/{id}', [UserController::class, 'load'])->name("user.profile");
-
-Route::post('/update-avatar', [UserController::class, 'saveAvatar'])->name('update.avatar');
-
-Route::get('/posts/show/{id}', [PostController::class, 'loadOnePost'])->name('show.post');
-
-Route::post('/delete-post/{id}', [PostController::class, 'deletePost'])->name('delete-post');
-
-Route::get('posts/edit/{id}', function($id){
-    try {
-        $post = Post::find($id);
-        return view("edit_post", compact('post'));
-    } catch (Exception $e) {
+    Route::get('/', function () {
         return redirect('posts');
-    }
-})->name("edit.post");
-Route::post('/edit-post/{id}', [PostController::class, 'editPost'])->name('edit-post');
+    });
+    
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->middleware(['auth', 'verified'])->name('dashboard');
+    
+    Route::get('/create', [PostController::class, 'loadGroupsDropdown'])->name('create');
+    
+    Route::post('/create-post', [PostController::class, 'create'])->name('create-post');
+    Route::get('/posts', [PostController::class, 'loadPosts'])->name('posts');
 
-Route::post('/dark-mode-switch', [Controller::class, 'darkMode'])->name('dark-mode-switch');
+    Route::get('/search', [PostController::class, 'searchPosts'])->name('search');
 
-Route::post('/create-comment', [CommentController::class, 'createComment'])->name('create-comment');
+    Route::get('/user/{id}', [UserController::class, 'load'])->name("user.profile");
 
-Route::get('/create_group', function(){
-    return view('create_group');
-})->name('createGroup');
+    Route::post('/update-avatar', [UserController::class, 'saveAvatar'])->name('update.avatar');
 
-Route::post('/create-group', [GroupController::class, 'create'])->name('create-group');
+    Route::post('/bio-edit', [ProfileController::class, 'editBio'])->name('editBio');
+    Route::post('/bio-delete', [ProfileController::class, 'deleteBio'])->name('deleteBio');
 
-Route::get('/groups/show/{id}', [GroupController::class, 'loadOneGroup'])->name('show.group');
+    Route::get('/posts/show/{id}', [PostController::class, 'loadOnePost'])->name('show.post');
 
-Route::get('/groups', [GroupController::class, 'load'])->name('groups');
+    Route::post('/delete-post/{id}', [PostController::class, 'deletePost'])->name('delete-post');
 
-Route::get('/group/users/{id}', [GroupController::class, 'loadUsers'])->name('group_users');
+    Route::get('posts/edit/{id}', function ($id) {
+        try {
+            $post = Post::find($id);
+            return view("edit_post", compact('post'));
+        } catch (Exception $e) {
+            return redirect('posts');
+        }
+    })->name("edit.post");
+    Route::post('posts/edit/{id}', [PostController::class, 'editPost'])->name('edit-post');
 
-Route::get('/group/add_user/{id}', [GroupController::class, 'addUserToGroup'])->name('addUserToGroup');
+    Route::post('/dark-mode-switch', [Controller::class, 'darkMode'])->name('dark-mode-switch');
 
-Route::get('group/delete_user/{id}', [GroupController::class, 'deleteUserFromGroup'])->name('deleteUserFromGroup');
+    Route::post('/create-comment/{id}', [CommentController::class, 'createComment'])->name('create-comment');
 
-Route::get('group/delete/{id}', function($id){
-    $group = Group::where('id', $id)->first();
-    return view('delete_group', compact('group'));
-})->name('delete-group');
+    Route::post('/comment/update/{id}', [CommentController::class, 'update'])->name('update-comment');
 
-Route::get('group/deleteGroup/{id}', [GroupController::class, 'delete'])->name('deleteGroup');
-require __DIR__.'/auth.php';
+    Route::post('delete-comment/{id}', [CommentController::class, 'delete'])->name('delete-comment');
+
+    Route::post('/create-reply/{id}', [CommentController::class, 'createComment'])->name('create-reply');
+
+    Route::get('/create_group', function () {
+        return view('create_group');
+    })->name('createGroup');
+
+    Route::post('/create-group', [GroupController::class, 'create'])->name('create-group');
+
+    Route::get('/groups', [GroupController::class, 'load'])->name('groups');
+
+    Route::middleware('groupmid')->group(function(){
+        Route::get('/groups/show/{id}', [GroupController::class, 'loadOneGroup'])->name('show.group');
+    
+        Route::get('/groups/users/{id}', [GroupController::class, 'loadUsers'])->name('group_users');
+    
+        Route::get('/groups/add_user/{id}', [GroupController::class, 'addUserToGroup'])->name('addUserToGroup');
+    
+        Route::get('/groups/delete_user/{id}', [GroupController::class, 'deleteUserFromGroup'])->name('deleteUserFromGroup');
+    
+        Route::get('/groups/settings/{id}', function ($id) {
+            $group = Group::where('id', $id)->first();
+            return view('group_settings', compact('group'));
+        })->name('group_settings')->middleware('groupmid');
+    });
+
+    Route::get('group/deleteGroup/{id}', [GroupController::class, 'delete'])->name('deleteGroup')->middleware('groupmid');
+
+    Route::post('group/transfer/{id}', [GroupController::class, 'transferRights'])->name('transfer');
+    Route::post('/groups/search', [GroupController::class, 'searchGroup'])->name('searchGroups')->middleware('searchmid');
+    Route::get('/groups/search', function () {
+        return redirect('groups');
+    });
+
+    // ADMIN PANEL
+    Route::get('/admin', [ProfileController::class, 'loadUsers'])->name('admin-panel');
+    Route::post('/admin/delete-user/{id}', [ProfileController::class, 'delete'])->name('user-delete');
+});
+require __DIR__ . '/auth.php';

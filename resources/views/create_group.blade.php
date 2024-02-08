@@ -17,7 +17,7 @@
                 @enderror
             </div>
             <div class="flex justify-end items-end p-2 mt-2">
-                <button type="submit" class="btn-dark">Odeslat</button>
+                <button type="submit" class="text-white font-bold bg-blue-500 hover:bg-blue-600 p-2 inline rounded-lg">Odeslat</button>
             </div>
         </form>
     </div>

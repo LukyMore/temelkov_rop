@@ -23,23 +23,17 @@ class UserController extends Controller
             'avatar' => 'required|file|image|max:2048'
         ]);
         
-        // Get the authenticated user
-        $user = $request->user();
+        $user = Auth::user();
         
-        // Get the avatar file from the request
         $fileName = time() . '-' . uniqid() . '.' . $request->file('avatar')->extension();
         
         File::delete(public_path('storage/'.$user->avatar));
-        // Save the avatar file to storage
         $avatarUploaded = $request->file('avatar');
         $avatarPath = public_path('/storage/');
         $avatarUploaded->move($avatarPath, $fileName);
-        // Update the user's avatar in the database
         $user = Auth::user();
         $user->avatar = $fileName;
         $user->save();
-        
-        // Redirect the user back to their profile page
         return redirect()->route('user.profile', ['id' => Auth::user()->id]);
     }
 }

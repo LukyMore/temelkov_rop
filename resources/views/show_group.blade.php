@@ -4,14 +4,14 @@
             Skupina {{ $group->name }}
         </h2>
     </x-slot>
-    <div class="mt-2 max-w-5xl mx-auto">
+    <div class="mt-2 max-w-5xl mx-auto w-full flex">
         <a href="{{ route('groups') }}"
-            class="bg-gray-800 font-semibold text-white text-xs hover:bg-gray-700 uppercase rounded-md tracking-widest p-2">
-            <i class="fa-solid fa-left-long"></i>
-            Zpět
+        class="bg-gray-800 font-semibold text-white text-md hover:bg-gray-700 uppercase rounded-md p-2 w-full text-center">
+        <i class="fa-solid fa-left-long"></i>
+        Zpět
         </a>
     </div>
-    <div class="mt-4 max-w-5xl mx-auto bg-white px-6 py-6 rounded-2xl group border-2 dark:bg-black dark:text-white h-auto">
+    <div class="mt-4 max-w-5xl mx-auto bg-white px-6 pt-3 rounded-2xl group border-2 dark:bg-black dark:text-white h-auto">
         <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex dark:text-white">
             <x-nav-link :href="route('show.group', $group->id)" :active="request()->routeIs('show.group')">
                 {{ __('Příspěvky') }}
@@ -20,26 +20,26 @@
                 {{ __('Uživatelé') }}
             </x-nav-link>
             @if(Auth::user()->groups->where('id', $group->id)->first() && Auth::user()->groups->where('id', $group->id)->first()->pivot->is_moderator)
-            <x-nav-link :href="route('delete-group', $group->id)" :active="request()->routeIs('delete-group')">
-                {{ __('Odstranit skupinu') }}
+            <x-nav-link :href="route('group_settings', $group->id)" :active="request()->routeIs('group_settings')">
+                {{ __('Nastavení skupiny') }}
             </x-nav-link>
             @endif
         </div>
         <span class="flex text-3xl border-b-black border-b-2 pb-2 mt-2 dark:border-b-white">
             {{ $group->name }} - příspěvky
         </span>
-        <div class="max-w-7xl mx-auto bg-gray-200 p-2 h-auto">
+        <div class="max-w-7xl mx-auto p-2">
         @if (count($posts) != 0)
             @foreach ($posts as $post)
                 <div
-                    class="max-w-4xl mx-auto mb-4 bg-white px-6 py-6 rounded-2xl dark:bg-black dark:text-white dark:border-2 dark:border-white">
+                    class="max-w-5xl mx-auto mb-4 bg-white px-6 py-6 rounded-2xl dark:bg-black dark:text-white dark:border-white border-4">
                     <span class="flex font-medium text-3xl pb-2 border-black border-b-2 dark:border-white">
                         <a href="{{ route('show.post', $post->id) }}" class="hover:text-blue-500">
                             {{ $post->title }}
                         </a>
                     </span>
                     <span class="w-full mt-2 flex">
-                        {{ $post->body }}
+                        {!! $post->body !!}
                     </span>
                     <span class="justify-between items-end mt-4 flex border-t-2 border-black dark:border-white">
                         <span>Datum vytvoření: {{ $post->created_at->isoFormat('LLL') }}</span>
@@ -68,7 +68,7 @@
             @endforeach
     </div>
 @else
-    <div class="mt-4 max-w-7xl mx-auto bg-white px-6 py-6 rounded-2xl group">
+    <div class="mt-2 max-w-7xl mx-auto bg-white px-6 py-6 rounded-2xl group border-2">
         Žádné příspěvky neexistují.
     </div>
     @endif

@@ -14,7 +14,8 @@ use Illuminate\Support\Facades\Session;
 
 class PostController extends Controller
 {
-    public function loadGroupsDropdown(){
+    public function loadGroupsDropdown()
+    {
         $groups = Auth::user()->groups;
         return view('create_post', compact('groups'));
     }
@@ -25,10 +26,10 @@ class PostController extends Controller
             'body' => 'required',
             'group_id' => 'required|not_in:choose'
         ], [
-            'title.required' => 'Zadejte název článku.',
-            'body.required' => 'Zadejte obsah článku.',
-            'group_id.required' => 'Vyberte skupinu.'
-        ]);
+                'title.required' => 'Zadejte název článku.',
+                'body.required' => 'Zadejte obsah článku.',
+                'group_id.required' => 'Vyberte skupinu.'
+            ]);
 
         $post = new Post();
         $post->title = $request->title;
@@ -40,21 +41,32 @@ class PostController extends Controller
     }
     public function loadPosts(Request $request)
     {
-        $posts = Post::where('group_id','0')->get();
+        $posts = Post::all();
+        $groups = Auth::user()->groups;
         $sort_by = $request->get('sort_by');
-        switch ($sort_by){
+        $group_select = $request->get('group_select');
+        $query = Post::query();
+        if (!empty($group_select)) {
+            $query->where('group_id', $group_select);
+        } else {
+            $query->where('group_id', 0);
+        }
+    
+        // Apply sorting based on the selected option or default to descending order
+        switch ($sort_by) {
             default:
-                $posts = Post::where('group_id','0')->orderBy('created_at', 'desc')->get();
+                $query->orderBy('created_at', 'desc');
                 break;
             case 'oldest':
-                $posts = Post::where('group_id','0')->orderBy('created_at', 'asc')->get();
+                $query->orderBy('created_at', 'asc');
                 break;
         }
-        if (empty($posts))
-        {
+    
+        $posts = $query->get();
+        if (empty($posts)) {
             DB::table('posts')->truncate();
         }
-        return view('posts', compact('posts'));
+        return view('posts', compact('posts', 'groups'));
     }
 
     public function searchPosts(Request $request)
@@ -62,12 +74,12 @@ class PostController extends Controller
         $query = $request->get('query');
 
         if (empty($query)) {
-            $posts = Post::all();
+            $posts = Post::where('id', 0)->get();
             return redirect('posts');
         } else {
             $posts = Post::where('title', 'LIKE', '%' . $query . '%')->orWhere('body', 'LIKE', '%' . $query . '%')->get();
             foreach ($posts as $post) {
-                $post->title = str_replace($query, '<mark>'.$query.'</mark>', $post->title);
+                $post->title = str_replace($query, '<mark>' . $query . '</mark>', $post->title);
             }
         }
         return view('search', compact('posts', 'query'));
@@ -76,29 +88,35 @@ class PostController extends Controller
     public function loadOnePost(Request $request, $id)
     {
         $post = Post::find($id);
-        $comments = Comment::where('post_id', '=', $id)->get();
+        $comments = Comment::where('post_id', '=', $id)->whereNull('parent_id')->get();
         return view('show_post', compact('post', 'comments'));
     }
-    
-    public function deletePost($id){
-        DB::table('posts')->where('id', $id)->delete();
 
-        if (Post::count() == 0){
+    public function deletePost($id)
+    {
+        Post::where('id', $id)->delete();
+        Comment::where('post_id', $id)->delete();
+        //DB::table('posts')->where('id', $id)->delete();
+
+        if (Post::count() == 0) {
             Post::query()->truncate();
         }
-        
         return back();
     }
 
-    public function editPost(Request $request, $id){
+    public function editPost(Request $request, $id)
+    {
+        $post = Post::find($id);
+        if ($post->user_id != Auth::user()->id){
+            return redirect('posts')->with('error', "Nemůžeš upravit ostatní příspěvky");
+        }
         $request->validate([
             'title' => 'required',
             'body' => 'required'
         ], [
-            'title.required' => 'Zadejte název článku.',
-            'body.required' => 'Zadejte obsah článku.'
-        ]);
-        $post = Post::find($id);
+                'title.required' => 'Zadejte název článku.',
+                'body.required' => 'Zadejte obsah článku.'
+            ]);
         $post->title = $request->title;
         $post->body = $request->body;
         $post->update();

@@ -30,7 +30,7 @@
                     </a>
                 </span>
                 <span class="w-full mt-2 flex">
-                    {{!! $post->body !!}}
+                    {!! $post->body !!}
                 </span>
                 <span class="justify-between items-end mt-2 flex border-t-2 border-black dark:border-white">
                     <span>Datum vytvoření: {{ $post->created_at->isoFormat('LLL') }}</span>
